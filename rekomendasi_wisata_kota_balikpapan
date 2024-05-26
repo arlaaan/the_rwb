@@ -1,0 +1,253 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit, QGroupBox, QGridLayout
+from PyQt5.QtGui import QFont
+
+class DestinasiWidget(QWidget):
+    def __init__(self, destinasi):
+        super().__init__()
+
+        #untuk menampilkan deskripsi destinasi
+        self.destinasi = destinasi
+
+        #untuk menampilkan layout dan judul destinasi wisata serta kecamatan dan mengatur letak window
+        self.setWindowTitle(f"Destinasi Wisata di {destinasi['Kecamatan']}")
+        self.layout = QVBoxLayout()
+        self.setGeometry(700, 350, 500, 400)
+
+        #untuk menampilkan layout widget
+        self.daftar_destinasi_label = QLabel("Daftar Destinasi Wisata:")
+        self.layout.addWidget(self.daftar_destinasi_label)
+
+        # untuk membuat teks, gambar, atau tombol dalam bentuk grid
+        self.grid_layout = QGridLayout()
+        self.layout.addLayout(self.grid_layout)
+
+        #untuk membuat tombol untuk setiap destinasi, mengatur gaya tombol, dan menambahkannya ke dalam grid layout untuk ditampilkan dalam widget
+        row = 0
+        for dest in destinasi["Destinasi"]:
+            button = QPushButton(dest)
+            button.setStyleSheet("background-color: #4CAF50; color: white")  # Atur warna latar dan teks
+            button.clicked.connect(lambda _, d=dest: self.tampilkan_info_destinasi(d))
+            self.grid_layout.addWidget(button, row, 0)
+            row += 1
+
+        self.info_destinasi_textedit = QTextEdit()
+        self.layout.addWidget(self.info_destinasi_textedit)
+
+        self.setLayout(self.layout)
+
+    def tampilkan_info_destinasi(self, nomor_destinasi):
+        if nomor_destinasi in self.destinasi["Destinasi"]:
+            destinasi = self.destinasi["Destinasi"][nomor_destinasi]
+            info = f"<b>Destinasi:</b> {destinasi['Lokasi']}<br><b>Deskripsi:</b> {destinasi['Deskripsi']}<br><b>Waktu Buka:</b> {destinasi['Waktu Buka']}"
+            self.info_destinasi_textedit.setHtml(info)
+        else:
+            self.info_destinasi_textedit.setText("Pilihan tidak valid.")
+
+
+class MainWindow(QWidget):
+    def __init__(self, destinasi_wisata):
+        super().__init__()
+
+        # untuk membuat tombol untuk setiap destinasi, mengatur gaya tombol, dan menambahkannya ke dalam grid layout untuk ditampilkan dalam widget
+        self.destinasi_wisata = destinasi_wisata
+
+        self.setWindowTitle("Rekomendasi Destinasi Wisata di Balikpapan")
+        self.layout = QVBoxLayout()
+        self.setGeometry(500, 350, 500, 400)
+
+        self.selamat_datang_label = QLabel("Selamat datang di Program Destinasi Wisata di Balikpapan")
+        self.selamat_datang_label.setFont(QFont("Arial", 16, QFont.Bold))
+        self.layout.addWidget(self.selamat_datang_label)
+
+
+        self.layout.addWidget(QLabel("Pilih Wilayah Kecamatan:"))
+
+        self.button_layout = QHBoxLayout()
+        for Kecamatan in destinasi_wisata.keys():
+            button = QPushButton(Kecamatan)
+            button.setStyleSheet("background-color: #4CAF50; color: white")
+            button.clicked.connect(lambda _, k=Kecamatan: self.tampilkan_destinasi_widget(k))
+            self.button_layout.addWidget(button)
+        self.layout.addLayout(self.button_layout)
+
+        #untuk menutup aplikasi
+        self.selesai_button = QPushButton("Selesai")
+        self.selesai_button.setStyleSheet("background-color: #4CAF50; color: white")
+        self.selesai_button.clicked.connect(self.close_application)
+        self.layout.addWidget(self.selesai_button)
+
+        self.setLayout(self.layout)
+
+    def tampilkan_destinasi_widget(self, kecamatan):
+        if kecamatan in self.destinasi_wisata:
+            self.destinasi_widget = DestinasiWidget({"Kecamatan": kecamatan, "Destinasi":
+                self.destinasi_wisata[kecamatan]["Destinasi"]})
+            self.destinasi_widget.show()
+
+
+    def close_application(self):
+        QApplication.quit()
+
+
+def main():
+    destinasi_wisata = {
+        "Balikpapan Barat": {
+            "Destinasi": {
+                "kampung atas air ": {
+                    "Lokasi": "kampung atas air ",
+                    "Deskripsi": "Jl. Sepaku Laut, Marga Sari, Kec. Balikpapan Bar., Kota Balikpapan, Kalimantan Timur 76123",
+                    "Waktu Buka": "24 jam"
+                },
+                "hutan mangrove margasari": {
+                    "Lokasi": "hutan mangrove margasari ",
+                    "Deskripsi": "Marga Sari, Kec. Balikpapan Bar., Kota Balikpapan, Kalimantan Timur 76123",
+                    "Waktu Buka": "24 jam"
+                },
+                "pantai menpora": {
+                    "Lokasi": "pantai menpora",
+                    "Deskripsi": "Pantai Monpera, Jl. Jenderal Sudirman No.1, RT.11, Klandasan Ulu, Kec. Balikpapan Kota, Kota Balikpapan, Kalimantan Timur",
+                    "Waktu Buka": "24 jam"
+                },
+                "rumah dahor": {
+                    "Lokasi": "rumah dahor",
+                    "Deskripsi": "DAHOR Heritage Balikpapan, Jl. Dahor No.1, Baru Ilir, Kec. Balikpapan Bar., Kota Balikpapan, Kalimantan Timur 76123",
+                    "Waktu Buka": " 9.00-16.00 WITA"
+                }
+            }
+        },
+        "Balikpapan Timur": {
+            "Destinasi": {
+                "pantai nelayan": {
+                    "Lokasi": "pantai nelayan",
+                    "Deskripsi": "Rt 52Jl. Lumba - Lumba, Manggar Baru, Kec. Balikpapan Tim., Kota Balikpapan, Kalimantan Timur 76116",
+                    "Waktu Buka": "24 jam"
+                },
+                "pantai Manggar segarasari": {
+                    "Lokasi": "pantai Manggar segarasari",
+                    "Deskripsi": "Jl. Pantai Manggar Segarasari Manggar, Manggar Baru, Kec. Balikpapan Tim., Kota Balikpapan, Kalimantan Timur 76116",
+                    "Waktu Buka": "7.30-18.00 WITA"
+                },
+                "pantai Lamaru": {
+                    "pantai Lamaru": "pantai Lamaru ",
+                    "Deskripsi": "jalan Mulawarman, Teritip, Lamaru, Kota Balikpapan",
+                    "Waktu Buka": " 08.00-17.00 WITA"
+                },
+                "pantai ambalat": {
+                    "Lokasi": "pantai ambalat",
+                    "Deskripsi": "kelurahan amborawang laut kecamatan samboja kabupaten kutai kartanegara, Ambarawang Laut, Kalimantan Timu",
+                    "Waktu Buka": "07.00-17.00 WITA"
+                },
+                "pantai watu beach": {
+                    "Lokasi": "pantai watu beach",
+                    "Deskripsi": " Jl. Mulawarman No.RT 16, Lamaru, Kec. Balikpapan Tim., Kota Balikpapan, Kalimantan Timur 76118",
+                    "Waktu Buka": "08.00-20.00 WITA"
+                }
+            }
+        },
+        "Balikpapan Utara": {
+            "Destinasi": {
+                "hutan lindung sungai wein": {
+                    "Lokasi": "hutan lindung sungai wein",
+                    "Deskripsi": "Jl. Soekarno-hatta, Karang Joang, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76127",
+                    "Waktu Buka": "06.00-18.00 WITA"
+                },
+                "mangrove center ghara indah": {
+                    "Lokasi": "mangrove center ghara indah",
+                    "Deskripsi": "Graha Indah, PGRI, Gg. Mangrove VI Graha Indah No.RT. 14, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76129",
+                    "Waktu Buka": "08.00-17.00 WITA"
+                },
+                "tanjung gading": {
+                    "Lokasi": "tanjung gading",
+                    "Deskripsi": "Jalan Soekarno Hatta Kilo Meter (KM) 12, RT 17 Kelurahan Karang Joang, Kecamatan Balikpapan Utara, Kota BalikpapanJalan Soekarno Hatta Kilo Meter (KM) 12, RT 17 Kelurahan Karang Joang, Kecamatan Balikpapan Utara, Kota Balikpapan",
+                    "Waktu Buka": "24 JAM"
+                },
+                "Meranti": {
+                    "Lokasi": "Meranti ",
+                    "Deskripsi": "Km. 15, Karang Joang, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76127",
+                    "Waktu Buka": "09.00-17.00 WITA"
+                },
+                "mahavira buddhamanggala": {
+                    "Lokasi": "mahavira buddhamanggala",
+                    "Deskripsi": "(Jl.MT. Haryono, Graha Indah Ring Road No.153, RT.043/RW.000, Batu Ampar, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76114",
+                    "Waktu Buka": "09.00-17.00 WITA"
+                },
+                "outbond kebon kita": {
+                    "Lokasi": "outbond kebon kita ",
+                    "Deskripsi": "Jl Padat Karya, km 8,5, Balikpapan, Kalimantan Tim., Batu Ampar, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76127",
+                    "Waktu Buka": " 09.00-18.00 WITA"
+                },
+                "kebun raya balikpapan": {
+                    "Lokasi": "kebun raya balikpapan",
+                    "Deskripsi": "alan Soekarno Hatta Km. 15, Karang Joang, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76127",
+                    "Waktu Buka": " 08.00-16.00 WITA"
+                },
+                "bamboe wanadesa": {
+                    "Lokasi": "bamboe wanadesa",
+                    "Deskripsi": "Jl. Giri Rejo, Karang Joang, Kec. Balikpapan Utara, Kota Balikpapan, Kalimantan Timur 76117",
+                    "Waktu Buka": "09.00-17.00 WITA"
+                }
+            }
+        },
+        "Balikpapan Selatan": {
+            "Destinasi": {
+                "Caribbean island water park Perumahan Balikpapan Regency Kol. Syarifuddin Yoes II": {
+                    "Lokasi": "Caribbean island water park Perumahan Balikpapan Regency Kol. Syarifuddin Yoes II ",
+                    "Deskripsi": "Ring Road II, Jalan Ruhui Rahayu, Sepinggan, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76115",
+                    "Waktu Buka": "08.30-18.00 WITA"
+                },
+                "taman hiburan BSB beach ": {
+                    "Lokasi": "taman hiburan BSB beach ",
+                    "Deskripsi": "Pantai BSB, Balikpapan Superblock, Jl. Jenderal Sudirman No.Kav 47, Gn. Bahagia, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76114",
+                    "Waktu Buka": "15.00-23.00 WITA"
+                },
+                "pantai AURI Sepinggan": {
+                    "Lokasi": "pantai AURI Sepinggan ",
+                    "Deskripsi": "Sepinggan, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timu",
+                    "Waktu Buka": "24 JAM"
+                },
+                "taman 3 generasi balikpapan": {
+                    "Lokasi": "taman 3 generasi balikpapan",
+                    "Deskripsi": "Jl. Jamrud I, Sepinggan, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76115",
+                    "Waktu Buka": " 24 JAM"
+                },
+                "pantai seraya balikpapan": {
+                    "Lokasi": "pantai seraya balikpapan",
+                    "Deskripsi": "Pantai Seraya Balikpapan, Gang Perjuangan No.RT.28, Sepinggan, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76115",
+                    "Waktu Buka": " 24 JAM"
+                },
+                "hayyu beach balikpapan": {
+                    "Lokasi": "hayyu beach balikpapan",
+                    "Deskripsi": "Gn. Bahagia, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76114",
+                    "Waktu Buka": "06.00-21.00 WITA"
+                },
+                "7pantai spn stal kuda": {
+                    "Lokasi": "pantai spn stal kuda",
+                    "Deskripsi": "Jl. Jendral Sudirman NO. 65 Gn. Bahagia, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76114",
+                    "Waktu Buka": "24 JAM"
+                },
+                "tanggul karang": {
+                    "Lokasi": "tanggul karang",
+                    "Deskripsi": "Gn. Bahagia, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76114",
+                    "Waktu Buka": " 05.30-23.00 WITA"
+                },
+                "pantai kilang mandiri": {
+                    "Lokasi": "pantai kilang mandiri",
+                    "Deskripsi": "JL. Jendral Sudirman, Prapatan, kecamatan Balikpapan Selatan, kota Balikpapan, Kalimantan Timur",
+                    "Waktu Buka": ""
+                }
+            }
+        }
+    }
+
+    app = QApplication(sys.argv)
+    window = MainWindow(destinasi_wisata)
+    window.setStyleSheet("background-color: broken white")  # Atur warna latar belakang utama
+    window.show()
+    sys.exit(app.exec_())
+
+
+
+
+if __name__ == "__main__":
+    main()
